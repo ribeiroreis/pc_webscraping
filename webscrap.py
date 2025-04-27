@@ -17,7 +17,8 @@ options.add_argument("--window-size=1920,1080")
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36")
 
 # Iniciar o driver
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+driver = webdriver.Chrome(options=options)
+
 
 # URL do produto
 url = "https://www.pichau.com.br/placa-de-video-gigabyte-radeon-rx-7600-xt-gaming-oc-16gb-gddr6-128-bit-gv-r76xtgaming-oc-16gd?gad_source=1&gclid=CjwKCAjwq7fABhB2EiwAwk-YbHKPu2eP6MOxnn_AytWtx8r9Rt6YmYykZ3CJqHlnV4PF9xeKjW19qRoCrHsQAvD_BwE"
