@@ -22,11 +22,14 @@ jobs:
       run: |
         pip install pandas selenium webdriver-manager
 
-    - name: Install ChromeDriver
+    - name: Install Chromium and ChromeDriver
       run: |
         sudo apt-get update
-        sudo apt-get install -y chromium-chromedriver
+        sudo apt-get install -y chromium-chromedriver chromium-browser
         sudo ln -sf /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+        # Definir as variáveis de ambiente para o Selenium
+        echo "CHROMIUM_BIN=/usr/bin/chromium-browser" >> $GITHUB_ENV
+        echo "CHROMEDRIVER_BIN=/usr/bin/chromedriver" >> $GITHUB_ENV
 
     - name: Run scraping script
       run: python pc_webscraping/webscrap.py
