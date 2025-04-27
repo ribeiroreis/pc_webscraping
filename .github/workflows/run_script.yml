@@ -3,15 +3,19 @@ name: Web Scraping and Commit CSV
 on:
   schedule:
     - cron: '0 0 * * *'  # Roda todo dia à meia-noite UTC
-  workflow_dispatch:    # Permite executar manualmente também
+  workflow_dispatch:      # Permite executar manualmente também
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Adicione esta permissão
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}  # Adicione o token aqui
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -38,7 +42,11 @@ jobs:
     - name: Commit and push CSV
       run: |
         git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'  # Email corrigido
         git add data/*.csv
-        git commit -m "Add new price data - $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        
+        # Commit condicional com mensagem de fallback
+        git diff-index --quiet HEAD || git commit -m "Add new price data - $(date '+%Y-%m-%d %H:%M:%S')"
+        
+        # Push com autenticação explícita
+        git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:main
