@@ -26,7 +26,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y chromium-chromedriver chromium-browser
-        sudo ln -sf /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+        # Verificar se o link simbólico já existe antes de criá-lo
+        if [ ! -f /usr/bin/chromedriver ]; then
+          sudo ln -sf /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+        fi
         # Definir as variáveis de ambiente para o Selenium
         echo "CHROMIUM_BIN=/usr/bin/chromium-browser" >> $GITHUB_ENV
         echo "CHROMEDRIVER_BIN=/usr/bin/chromedriver" >> $GITHUB_ENV
