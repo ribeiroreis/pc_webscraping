@@ -1,4 +1,4 @@
-name: Run Selenium Scraper
+name: Run Selenium Scraper and Commit CSV
 
 on:
   schedule:
@@ -6,12 +6,14 @@ on:
   workflow_dispatch: # Permite rodar manualmente
 
 jobs:
-  scrape_job:
+  scrape_and_commit:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -31,11 +33,12 @@ jobs:
         sudo apt install ./google-chrome-stable_current_amd64.deb -y
 
     - name: Run script
-      run: |
-        python script.py
+      run: python script.py
 
-    - name: Upload output file
-      uses: actions/upload-artifact@v4
-      with:
-        name: scraped-prices
-        path: output/
+    - name: Commit and Push historico.csv
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add output/historico.csv
+        git commit -m "chore: update price history ($(date +'%Y-%m-%d %H:%M:%S'))" || echo "No changes to commit"
+        git push
