@@ -35,7 +35,7 @@ jobs:
         echo "CHROMEDRIVER_BIN=/usr/bin/chromedriver" >> $GITHUB_ENV
 
     - name: Run scraping script
-      run: python pc_webscraping/webscrap.py
+      run: python webscrap.py
 
     - name: Commit and push CSV
       run: |
