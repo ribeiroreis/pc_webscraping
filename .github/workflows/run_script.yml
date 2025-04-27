@@ -33,7 +33,7 @@ jobs:
         sudo apt install ./google-chrome-stable_current_amd64.deb -y
 
     - name: Run script
-      run: python script.py
+      run: python webscrap.py
 
     - name: Commit and Push historico.csv
       run: |
