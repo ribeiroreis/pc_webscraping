@@ -1,19 +1,18 @@
-name: Run Selenium Scraper and Commit CSV
+name: Run webscraping and commit csv
 
 on:
+  push:
+    branches: [ "main" ]
   schedule:
-    - cron: '0 12 * * *' # Executa todo dia às 12h UTC (9h da manhã no Brasil)
-  workflow_dispatch: # Permite rodar manualmente
+    - cron: '0 12 * * *'  # Exemplo: todo dia meio-dia UTC
 
 jobs:
-  scrape_and_commit:
+  run-scraper:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -22,23 +21,25 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install selenium pandas
 
     - name: Install Chrome
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget unzip
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt install ./google-chrome-stable_current_amd64.deb -y
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Install ChromeDriver
+      run: |
+        sudo apt-get install -y chromium-chromedriver
+        sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
 
     - name: Run script
       run: python webscrap.py
 
-    - name: Commit and Push historico.csv
+    - name: Commit CSV file
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add output/historico.csv
-        git commit -m "chore: update price history ($(date +'%Y-%m-%d %H:%M:%S'))" || echo "No changes to commit"
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add *.csv
+        git commit -m "Atualiza CSV - $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
         git push
