@@ -74,7 +74,7 @@ def get_price(driver, url):
 def main():
     driver = setup_driver()
     try:
-        df_urls = pd.read_csv(r'C:\workspace\projects\fbref\scripts\urls_pichau.csv')
+        df_urls = pd.read_csv('urls_pichau.csv')
         
         for index, row in df_urls.iterrows():
             peca = row['peca']
