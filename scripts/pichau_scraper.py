@@ -1,5 +1,3 @@
-
-
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -10,20 +8,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 import os
 import time
-
-# Adicione estas linhas no início do script
-import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, '..', 'data')
-
-# Modifique as linhas de leitura/escrita de arquivos:
-df_urls = pd.read_csv(os.path.join(BASE_DIR, '..', 'urls_pichau.csv'))
-...
-file_path = os.path.join(DATA_DIR, 'historico_precos.csv')
-file_exists = os.path.isfile(file_path)
-...
-new_data.to_csv(file_path, ...)
 
 def setup_driver():
     options = webdriver.ChromeOptions()
@@ -36,26 +20,19 @@ def setup_driver():
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
     
-    # Removida configuração problemática
     options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
     options.add_experimental_option("useAutomationExtension", False)
     
-    # Configuração do serviço
     service = Service(ChromeDriverManager().install())
-    service.creationflags = 0x08000000  # Esconde a janela do console no Windows
-    
     return webdriver.Chrome(service=service, options=options)
 
 def get_price(driver, url):
     try:
         driver.get(url)
-        
-        # Espera mais robusta com verificação de conteúdo
         price_element = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'price_vista') and contains(text(), 'R$')]"))
         )
         
-        # Processamento mais seguro do preço
         price_text = price_element.get_attribute("textContent").strip()
         price = float(
             price_text
@@ -68,13 +45,21 @@ def get_price(driver, url):
         return price
         
     except Exception as e:
-        print(f"Erro detalhado ao obter preço: {str(e)}")
+        print(f"Erro ao obter preço: {str(e)}")
         return None
 
 def main():
+    # Configura caminhos dos arquivos
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    urls_path = os.path.join(base_dir, 'urls_pichau.csv')
+    data_path = os.path.join(base_dir, 'data', 'historico_precos.csv')
+    
+    # Cria diretório data se não existir
+    os.makedirs(os.path.dirname(data_path), exist_ok=True)
+    
     driver = setup_driver()
     try:
-        df_urls = pd.read_csv('urls_pichau.csv')
+        df_urls = pd.read_csv(urls_path)
         
         for index, row in df_urls.iterrows():
             peca = row['peca']
@@ -82,8 +67,7 @@ def main():
             
             print(f"\nIniciando verificação para: {peca}")
             
-            # Tenta 3 vezes para cada URL
-            for tentativa in range(1, 6):
+            for tentativa in range(1, 4):
                 print(f"Tentativa {tentativa}/3")
                 price = get_price(driver, url)
                 if price:
@@ -91,9 +75,9 @@ def main():
                     new_data = pd.DataFrame([[timestamp, peca, price]], 
                                           columns=['Data_Hora', 'Peca', 'Preco'])
                     
-                    file_exists = os.path.isfile('historico_precos.csv')
+                    file_exists = os.path.isfile(data_path)
                     
-                    new_data.to_csv('historico_precos.csv', 
+                    new_data.to_csv(data_path, 
                                   mode='a', 
                                   header=not file_exists, 
                                   index=False,
@@ -113,7 +97,6 @@ def main():
         driver.quit()
 
 if __name__ == "__main__":
-    # Configura logs do Chrome
     os.environ['WDM_LOG_LEVEL'] = '0'
     os.environ['WDM_PRINT_FIRST_LINE'] = 'False'
     main()
